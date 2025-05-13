@@ -5,6 +5,9 @@ def main():
 	""" The main method where we create and setup our PyGame program """
 
 	running = True
+	window = OpenGLWindow()  # Create a window with a width of 800 and height of 600
+	window.initGL()  # Initialize OpenGL context and settings
+	window.render()  # Render the window
 
 	while running:
 
