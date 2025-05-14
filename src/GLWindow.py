@@ -29,7 +29,6 @@ class Triangle:
 class OpenGLWindow:
 
     def __init__(self):
-        self.triangle = None
         self.clock = pg.time.Clock()
 
     def loadShaderProgram(self, vertex, fragment):
@@ -70,13 +69,10 @@ class OpenGLWindow:
         glUseProgram(self.shader)
 
         colorLoc = glGetUniformLocation(self.shader, "objectColor")
-        glUniform3f(colorLoc, 1.0, 1.0, 1.0)
-
-        # Uncomment this for triangle rendering
-        self.triangle = Triangle(self.shader)
+        glUniform3f(colorLoc, 1.0, 1.0, 1.0)    # Triangle color
 
         # Uncomment this for model rendering
-        #self.cube = Geometry('./resources/cube.obj')
+        self.cube = Geometry('./resources/cube.obj')
 
         print("Setup complete!")
 
@@ -85,11 +81,8 @@ class OpenGLWindow:
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         glUseProgram(self.shader)  # You may not need this line
 
-        #Uncomment this for triangle rendering
-        glDrawArrays(GL_TRIANGLES, 0, self.triangle.vertexCount)
-
         # Uncomment this for model rendering
-        #glDrawArrays(GL_TRIANGLES, 0, self.cube.vertexCount)
+        glDrawArrays(GL_TRIANGLES, 0, self.cube.vertexCount)
 
 
         # Swap the front and back buffers on the window, effectively putting what we just "drew"
@@ -98,7 +91,5 @@ class OpenGLWindow:
 
     def cleanup(self):
         glDeleteVertexArrays(1, (self.vao,))
-        # Uncomment for triangle rendering
-        self.triangle.cleanup()
         # Uncomment for model rendering
-        #self.cube.cleanup()
+        self.cube.cleanup()
