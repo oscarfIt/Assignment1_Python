@@ -52,7 +52,7 @@ class OpenGLWindow:
         glUniform3f(colorLoc, 1.0, 1.0, 1.0)    # Triangle color
 
         # Uncomment this for model rendering
-        self.cube = Geometry('./resources/cube.obj')
+        self.sun = Geometry('./resources/cube.obj')
 
         print("Setup complete!")
 
@@ -62,7 +62,7 @@ class OpenGLWindow:
         glUseProgram(self.shader)  # You may not need this line
 
         # Uncomment this for model rendering
-        glDrawArrays(GL_TRIANGLES, 0, self.cube.vertexCount)
+        glDrawArrays(GL_TRIANGLES, 0, self.sun.vertexCount)
 
 
         # Swap the front and back buffers on the window, effectively putting what we just "drew"
@@ -72,4 +72,4 @@ class OpenGLWindow:
     def cleanup(self):
         glDeleteVertexArrays(1, (self.vao,))
         # Uncomment for model rendering
-        self.cube.cleanup()
+        self.sun.cleanup()
