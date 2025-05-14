@@ -162,3 +162,16 @@ class Geometry:
 
     def cleanup(self):
         glDeleteBuffers(1, (self.vbo,))
+
+class Sun(Geometry):
+    def __init__(self, filename):
+        super().__init__(filename)
+        
+
+class Earth(Geometry):
+    def __init__(self, filename):
+        super().__init__(filename)
+
+class Moon(Geometry):
+    def __init__(self, filename):
+        super().__init__(filename)
