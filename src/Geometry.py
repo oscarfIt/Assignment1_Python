@@ -3,6 +3,10 @@ import warnings
 
 from OpenGL.GL import *
 
+SUN_SCALE = 0.2
+EARTH_SCALE = 0.08
+MOON_SCALE = 0.02
+
 class Geometry:
     def __init__(self, filename):
         # Vertices stores all of the model data per face in the following format:
@@ -166,12 +170,21 @@ class Geometry:
 class Sun(Geometry):
     def __init__(self, filename):
         super().__init__(filename)
+        self.position = np.array([0.0, 0.0, -2.0], dtype=np.float32)
+        self.scale = np.array([SUN_SCALE, SUN_SCALE, SUN_SCALE], dtype=np.float32)
+        self.rotationAngle = 0.0
         
 
 class Earth(Geometry):
     def __init__(self, filename):
         super().__init__(filename)
+        self.position = np.array([0.7, 0.0, -2.0], dtype=np.float32)
+        self.scale = np.array([EARTH_SCALE, EARTH_SCALE, EARTH_SCALE], dtype=np.float32)
+        self.rotationAngle = 0.0
 
 class Moon(Geometry):
     def __init__(self, filename):
         super().__init__(filename)
+        self.position = np.array([0.0, 0.0, -1.0], dtype=np.float32)
+        self.scale = np.array([MOON_SCALE, MOON_SCALE, MOON_SCALE], dtype=np.float32)
+        self.rotationAngle = 0.0
