@@ -6,26 +6,6 @@ import numpy as np
 from Geometry import Geometry
 
 
-class Triangle:
-
-    def __init__(self, shader):
-        self.vertexLoc = glGetAttribLocation(shader, "position")
-        self.vertices = np.array([0.0, 0.5, 0.0,
-                                  -0.5, -0.5, 0.0,
-                                  0.5, -0.5, 0.0], dtype=np.float32)
-
-        self.vertexCount = 3
-        self.vbo = glGenBuffers(1)
-        glBindBuffer(GL_ARRAY_BUFFER, self.vbo)
-        glBufferData(GL_ARRAY_BUFFER, self.vertices.nbytes, self.vertices, GL_STATIC_DRAW)
-
-        glEnableVertexAttribArray(self.vertexLoc)
-        glVertexAttribPointer(self.vertexLoc, 3, GL_FLOAT, GL_FALSE, 0, ctypes.c_void_p(0))
-
-    def cleanup(self):
-        glDeleteBuffers(1, (self.vbo,))
-
-
 class OpenGLWindow:
 
     def __init__(self):
