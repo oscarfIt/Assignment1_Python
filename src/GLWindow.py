@@ -2,10 +2,9 @@ import pygame as pg
 from OpenGL.GL import *
 from OpenGL.GL.shaders import compileProgram, compileShader
 import numpy as np
+import pyrr
 
-from Geometry import Geometry
-
-
+from Geometry import *
 class OpenGLWindow:
 
     def __init__(self):
@@ -39,8 +38,8 @@ class OpenGLWindow:
         #glCullFace(GL_BACK)
         glClearColor(0, 0, 0, 1)
 
-        self.vao = glGenVertexArrays(1)
-        glBindVertexArray(self.vao)
+        self.sunVao = glGenVertexArrays(1)
+        self.earthVao = glGenVertexArrays(1)
 
         # Note that this path is relative to your working directory when running the program
         # You will need change the filepath if you are running the script from inside ./src/
@@ -49,10 +48,28 @@ class OpenGLWindow:
         glUseProgram(self.shader)
 
         colorLoc = glGetUniformLocation(self.shader, "objectColor")
-        glUniform3f(colorLoc, 1.0, 1.0, 1.0)    # Triangle color
+        glUniform3f(colorLoc, 1.0, 1.0, 1.0)    # Triangle color, may need to do something different here for getting different colored planets
 
         # Uncomment this for model rendering
-        self.sun = Geometry('./resources/cube.obj')
+        glBindVertexArray(self.sunVao)
+        self.sun = Sun('./resources/sphere-fixed.txt')
+        glBindVertexArray(self.earthVao)
+        self.earth = Earth('./resources/sphere-fixed.txt')
+
+        projection_transform = pyrr.matrix44.create_perspective_projection(
+            fovy=45,
+            aspect=screen_width / screen_height,
+            near=0.1,
+            far=10,
+            dtype=np.float32
+        )
+
+        glUniformMatrix4fv(
+            glGetUniformLocation(self.shader, "projection"),
+            1, GL_FALSE, projection_transform
+        )
+
+        self.modelMatrixLocation = glGetUniformLocation(self.shader, "model")
 
         print("Setup complete!")
 
@@ -61,15 +78,40 @@ class OpenGLWindow:
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         glUseProgram(self.shader)  # You may not need this line
 
-        # Uncomment this for model rendering
+        glBindVertexArray(self.sunVao)
+        self.positionGeometry(self.sun)
         glDrawArrays(GL_TRIANGLES, 0, self.sun.vertexCount)
 
+        glBindVertexArray(self.earthVao)
+        self.positionGeometry(self.earth)
+        glDrawArrays(GL_TRIANGLES, 0, self.earth.vertexCount)
 
         # Swap the front and back buffers on the window, effectively putting what we just "drew"
         # Onto the screen (whereas previously it only existed in memory)
         pg.display.flip()
 
+
+    def positionGeometry(self, geometry):
+        model_transform = pyrr.matrix44.create_identity(dtype=np.float32)
+        model_transform = pyrr.matrix44.multiply(
+            m1 = model_transform,
+            m2 = pyrr.matrix44.create_from_scale(
+                scale=geometry.scale,
+                dtype=np.float32
+            )
+        )
+
+        model_transform = pyrr.matrix44.multiply(
+            m1 = model_transform,
+            m2 = pyrr.matrix44.create_from_translation(
+                vec=geometry.position,
+                dtype=np.float32
+            )
+        )
+        glUniformMatrix4fv(self.modelMatrixLocation, 1, GL_FALSE, model_transform)
+
     def cleanup(self):
-        glDeleteVertexArrays(1, (self.vao,))
-        # Uncomment for model rendering
+        glDeleteVertexArrays(1, (self.sunVao,))
+        glDeleteVertexArrays(1, (self.earthVao,))
         self.sun.cleanup()
+        self.earth.cleanup()
