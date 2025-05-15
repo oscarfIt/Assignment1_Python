@@ -50,13 +50,12 @@ class OpenGLWindow:
         self.shader = self.loadShaderProgram("./shaders/simple.vert", "./shaders/simple.frag")
         glUseProgram(self.shader)
 
-        colorLoc = glGetUniformLocation(self.shader, "objectColor")
-        glUniform3f(colorLoc, 1.0, 1.0, 1.0)    # Triangle color, may need to do something different here for getting different colored planets
-
         glBindVertexArray(self.sunVao)
         self.sun = Sun('./resources/sphere-fixed.txt')
+
         glBindVertexArray(self.earthVao)
         self.earth = Earth('./resources/sphere-fixed.txt')
+
         glBindVertexArray(self.moonVao)
         self.moon = Moon('./resources/sphere-fixed.txt')
 
@@ -81,19 +80,23 @@ class OpenGLWindow:
     def render(self):
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         glUseProgram(self.shader)  # You may not need this line
+        colorLoc = glGetUniformLocation(self.shader, "objectColor")
         self.clock.tick(60)
 
+        glUniform3f(colorLoc, 1.0, 1.0, 0.0)
         glBindVertexArray(self.sunVao)
         self.positionGeometry(self.sun)
         glDrawArrays(GL_TRIANGLES, 0, self.sun.vertexCount)
 
         self.earth.rotationAngle += self.earthRotationSpeed
+        glUniform3f(colorLoc, 0.0, 0.5, 1.0)
         glBindVertexArray(self.earthVao)
         self.updateEarthPosition()
         self.positionGeometry(self.earth)
         glDrawArrays(GL_TRIANGLES, 0, self.earth.vertexCount)
 
         self.moon.rotationAngle += self.moonRotationSpeed
+        glUniform3f(colorLoc, 0.7, 0.7, 0.7)
         glBindVertexArray(self.moonVao)
         self.updateMoonPosition()
         self.positionGeometry(self.moon)
@@ -105,24 +108,24 @@ class OpenGLWindow:
 
 
     def positionGeometry(self, geometry):
-        model_transform = pyrr.matrix44.create_identity(dtype=np.float32)
-        model_transform = pyrr.matrix44.multiply(
-            m1 = model_transform,
+        transform_matrix = pyrr.matrix44.create_identity(dtype=np.float32)
+        transform_matrix = pyrr.matrix44.multiply(
+            m1 = transform_matrix,
             m2 = pyrr.matrix44.create_from_scale(
                 scale=geometry.scale,
                 dtype=np.float32
             )
         )
 
-        model_transform = pyrr.matrix44.multiply(
-            m1 = model_transform,
+        transform_matrix = pyrr.matrix44.multiply(
+            m1 = transform_matrix,
             m2 = pyrr.matrix44.create_from_translation(
                 vec=geometry.position,
                 dtype=np.float32
             )
         )
 
-        glUniformMatrix4fv(self.modelMatrixLocation, 1, GL_FALSE, model_transform)
+        glUniformMatrix4fv(self.modelMatrixLocation, 1, GL_FALSE, transform_matrix)
 
 
     def updateEarthPosition(self):
