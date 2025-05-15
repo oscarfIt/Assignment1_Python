@@ -9,6 +9,8 @@ class OpenGLWindow:
 
     def __init__(self):
         self.clock = pg.time.Clock()
+        self.earthRotationSpeed = 0.03
+        self.moonRotationSpeed = 0.06
 
     def loadShaderProgram(self, vertex, fragment):
         with open(vertex, 'r') as f:
@@ -40,6 +42,7 @@ class OpenGLWindow:
 
         self.sunVao = glGenVertexArrays(1)
         self.earthVao = glGenVertexArrays(1)
+        self.moonVao = glGenVertexArrays(1)
 
         # Note that this path is relative to your working directory when running the program
         # You will need change the filepath if you are running the script from inside ./src/
@@ -50,11 +53,12 @@ class OpenGLWindow:
         colorLoc = glGetUniformLocation(self.shader, "objectColor")
         glUniform3f(colorLoc, 1.0, 1.0, 1.0)    # Triangle color, may need to do something different here for getting different colored planets
 
-        # Uncomment this for model rendering
         glBindVertexArray(self.sunVao)
         self.sun = Sun('./resources/sphere-fixed.txt')
         glBindVertexArray(self.earthVao)
         self.earth = Earth('./resources/sphere-fixed.txt')
+        glBindVertexArray(self.moonVao)
+        self.moon = Moon('./resources/sphere-fixed.txt')
 
         projection_transform = pyrr.matrix44.create_perspective_projection(
             fovy=45,
@@ -77,14 +81,23 @@ class OpenGLWindow:
     def render(self):
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         glUseProgram(self.shader)  # You may not need this line
+        self.clock.tick(60)
 
         glBindVertexArray(self.sunVao)
         self.positionGeometry(self.sun)
         glDrawArrays(GL_TRIANGLES, 0, self.sun.vertexCount)
 
+        self.earth.rotationAngle += self.earthRotationSpeed
         glBindVertexArray(self.earthVao)
+        self.updateEarthPosition()
         self.positionGeometry(self.earth)
         glDrawArrays(GL_TRIANGLES, 0, self.earth.vertexCount)
+
+        self.moon.rotationAngle += self.moonRotationSpeed
+        glBindVertexArray(self.moonVao)
+        self.updateMoonPosition()
+        self.positionGeometry(self.moon)
+        glDrawArrays(GL_TRIANGLES, 0, self.moon.vertexCount)
 
         # Swap the front and back buffers on the window, effectively putting what we just "drew"
         # Onto the screen (whereas previously it only existed in memory)
@@ -108,10 +121,25 @@ class OpenGLWindow:
                 dtype=np.float32
             )
         )
+
         glUniformMatrix4fv(self.modelMatrixLocation, 1, GL_FALSE, model_transform)
+
+
+    def updateEarthPosition(self):
+        orbit_offset = 0.5
+        self.earth.position[0] = np.sin(self.earth.rotationAngle) * orbit_offset + self.sun.position[0]
+        self.earth.position[1] = np.cos(self.earth.rotationAngle) * orbit_offset + self.sun.position[1]
+        self.earth.position[2] = -3.0
+
+    def updateMoonPosition(self):
+        orbit_offset = 0.2
+        self.moon.position[0] = np.sin(self.moon.rotationAngle) * orbit_offset + self.earth.position[0]
+        self.moon.position[1] = np.cos(self.moon.rotationAngle) * orbit_offset + self.earth.position[1]
+        self.moon.position[2] = -3.0
 
     def cleanup(self):
         glDeleteVertexArrays(1, (self.sunVao,))
         glDeleteVertexArrays(1, (self.earthVao,))
         self.sun.cleanup()
         self.earth.cleanup()
+        self.moon.cleanup()
