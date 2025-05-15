@@ -51,13 +51,13 @@ class OpenGLWindow:
         glUseProgram(self.shader)
 
         glBindVertexArray(self.sunVao)
-        self.sun = Sun('./resources/sphere-fixed.txt')
+        self.sun = Sun('./resources/sphere.txt')
 
         glBindVertexArray(self.earthVao)
-        self.earth = Earth('./resources/sphere-fixed.txt')
+        self.earth = Earth('./resources/sphere.txt')
 
         glBindVertexArray(self.moonVao)
-        self.moon = Moon('./resources/sphere-fixed.txt')
+        self.moon = Moon('./resources/sphere.txt')
 
         projection_transform = pyrr.matrix44.create_perspective_projection(
             fovy=45,
@@ -129,7 +129,7 @@ class OpenGLWindow:
 
 
     def updateEarthPosition(self):
-        orbit_offset = 0.5
+        orbit_offset = 0.6
         self.earth.position[0] = np.sin(self.earth.rotationAngle) * orbit_offset + self.sun.position[0]
         self.earth.position[1] = np.cos(self.earth.rotationAngle) * orbit_offset + self.sun.position[1]
         self.earth.position[2] = -3.0
