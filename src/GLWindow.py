@@ -36,8 +36,8 @@ class OpenGLWindow:
 
         glEnable(GL_DEPTH_TEST)
         # Uncomment these two lines when perspective camera has been implemented
-        #glEnable(GL_CULL_FACE)
-        #glCullFace(GL_BACK)
+        glEnable(GL_CULL_FACE)
+        glCullFace(GL_BACK)
         glClearColor(0, 0, 0, 1)
 
         self.sunVao = glGenVertexArrays(1)
