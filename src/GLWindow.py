@@ -5,6 +5,8 @@ import numpy as np
 import pyrr
 
 from Geometry import *
+from Texture import *
+
 class OpenGLWindow:
 
     def __init__(self):
@@ -49,6 +51,10 @@ class OpenGLWindow:
 
         self.shader = self.loadShaderProgram("./shaders/simple.vert", "./shaders/simple.frag")
         glUseProgram(self.shader)
+        glUniform1i(glGetUniformLocation(self.shader, "imageTexture"), 0)
+        self.sunTexture = Texture(SUN_TEXTURE)
+        self.earthTexture = Texture(EARTH_TEXTURE)
+        self.moonTexture = Texture(MOON_TEXTURE)
 
         glBindVertexArray(self.sunVao)
         self.sun = Sun('./resources/sphere.txt')
@@ -83,12 +89,16 @@ class OpenGLWindow:
         colorLoc = glGetUniformLocation(self.shader, "objectColor")
         self.clock.tick(60)
 
+        glActiveTexture(GL_TEXTURE0)
+        glBindTexture(GL_TEXTURE_2D, self.sunTexture.texture)
         glUniform3f(colorLoc, 1.0, 1.0, 0.0)
         glBindVertexArray(self.sunVao)
         self.positionGeometry(self.sun)
         glDrawArrays(GL_TRIANGLES, 0, self.sun.vertexCount)
 
         self.earth.rotationAngle += self.earthRotationSpeed
+        glActiveTexture(GL_TEXTURE0)
+        glBindTexture(GL_TEXTURE_2D, self.earthTexture.texture)
         glUniform3f(colorLoc, 0.0, 0.5, 1.0)
         glBindVertexArray(self.earthVao)
         self.updateEarthPosition()
@@ -96,6 +106,8 @@ class OpenGLWindow:
         glDrawArrays(GL_TRIANGLES, 0, self.earth.vertexCount)
 
         self.moon.rotationAngle += self.moonRotationSpeed
+        glActiveTexture(GL_TEXTURE0)
+        glBindTexture(GL_TEXTURE_2D, self.moonTexture.texture)
         glUniform3f(colorLoc, 0.7, 0.7, 0.7)
         glBindVertexArray(self.moonVao)
         self.updateMoonPosition()
@@ -113,6 +125,14 @@ class OpenGLWindow:
             m1 = transform_matrix,
             m2 = pyrr.matrix44.create_from_scale(
                 scale=geometry.scale,
+                dtype=np.float32
+            )
+        )
+
+        transform_matrix = pyrr.matrix44.multiply(
+            m1=transform_matrix,
+            m2=pyrr.matrix44.create_from_z_rotation(
+                theta=np.radians(180),
                 dtype=np.float32
             )
         )
@@ -143,6 +163,9 @@ class OpenGLWindow:
     def cleanup(self):
         glDeleteVertexArrays(1, (self.sunVao,))
         glDeleteVertexArrays(1, (self.earthVao,))
+        self.sunTexture.cleanup()
+        self.earthTexture.cleanup()
+        self.moonTexture.cleanup()
         self.sun.cleanup()
         self.earth.cleanup()
         self.moon.cleanup()
