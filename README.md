@@ -17,3 +17,7 @@ S - Speed up earth rotation
 Z - Slow down moon rotation
 X - Speed up moon rotation
 Space - Pause/Resume sim
+
+J - Pause/Resume camera rotation clockwise around X axis
+K - Pause/Resume camera rotation clockwise around Y axis
+L - Pause/Resume camera rotation clockwise around Z axis

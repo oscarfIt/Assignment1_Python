@@ -170,7 +170,7 @@ class Geometry:
 class Sun(Geometry):
     def __init__(self, filename):
         super().__init__(filename)
-        self.position = np.array([0.3, 0.3, -3.0], dtype=np.float32)
+        self.position = np.array([0.0, 0.0, -3.0], dtype=np.float32)
         self.scale = np.array([SUN_SCALE, SUN_SCALE, SUN_SCALE], dtype=np.float32)
         self.rotationAngle = 0.0
         

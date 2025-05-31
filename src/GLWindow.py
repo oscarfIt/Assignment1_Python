@@ -13,6 +13,9 @@ class OpenGLWindow:
         self.clock = pg.time.Clock()
         self.earthRotationSpeed = 0.03
         self.moonRotationSpeed = 0.06
+        self.cameraXRotationSpeed = 0.0
+        self.cameraYRotationSpeed = 0.0
+        self.cameraZRotationSpeed = 0.0
 
     def loadShaderProgram(self, vertex, fragment):
         with open(vertex, 'r') as f:
@@ -51,6 +54,9 @@ class OpenGLWindow:
 
         self.shader = self.loadShaderProgram("./shaders/simple.vert", "./shaders/simple.frag")
         glUseProgram(self.shader)
+        self.camera = Camera()
+        viewLocation = glGetUniformLocation(self.shader, "view")
+        glUniformMatrix4fv(viewLocation, 1, GL_FALSE, self.camera.view_matrix)
         glUniform1i(glGetUniformLocation(self.shader, "imageTexture"), 0)
         self.sunTexture = Texture(SUN_TEXTURE)
         self.earthTexture = Texture(EARTH_TEXTURE)
@@ -87,6 +93,18 @@ class OpenGLWindow:
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         glUseProgram(self.shader)  # You may not need this line
         colorLoc = glGetUniformLocation(self.shader, "objectColor")
+        # self.camera.update_position(np.array([0.0, 0.5, 1.0], dtype=np.float32))
+
+        self.camera.rotationXAngle += self.cameraXRotationSpeed
+        self.camera.rotationYAngle += self.cameraYRotationSpeed
+        self.camera.rotationZAngle += self.cameraZRotationSpeed
+        self.camera.position[0] = np.sin(self.camera.rotationXAngle) * self.camera.orbit_radius
+        self.camera.position[1] = np.cos(self.camera.rotationYAngle) * self.camera.orbit_radius
+        self.camera.position[2] = np.tan(self.camera.rotationZAngle) * self.camera.orbit_radius
+        self.camera.update_position(self.camera.position)
+
+        viewLocation = glGetUniformLocation(self.shader, "view")
+        glUniformMatrix4fv(viewLocation, 1, GL_FALSE, self.camera.view_matrix)
         self.clock.tick(60)
 
         glActiveTexture(GL_TEXTURE0)
@@ -169,3 +187,30 @@ class OpenGLWindow:
         self.sun.cleanup()
         self.earth.cleanup()
         self.moon.cleanup()
+
+class Camera:
+    def __init__(self):
+        self.position = np.array([0.0, 0.0, 1.0], dtype=np.float32)
+        self.target = np.array([0.0, 0.0, -3.0], dtype=np.float32)
+        self.up = np.array([0.0, 1.0, 0.0], dtype=np.float32)
+        self.rotationXAngle = 0.0
+        self.rotationYAngle = 0.0
+        self.rotationZAngle = 0.0
+        self.orbit_radius = 4.0
+        self.rotationSpeed = 0.01
+
+        self.view_matrix = pyrr.matrix44.create_look_at(
+            eye=self.position,
+            target=self.target,
+            up=self.up,
+            dtype=np.float32
+        )
+
+    def update_position(self, position):
+        self.position = position
+        self.view_matrix = pyrr.matrix44.create_look_at(
+            eye=self.position,
+            target=self.target,
+            up=self.up,
+            dtype=np.float32
+        )
