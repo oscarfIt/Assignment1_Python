@@ -98,9 +98,9 @@ class OpenGLWindow:
         self.camera.rotationXAngle += self.cameraXRotationSpeed
         self.camera.rotationYAngle += self.cameraYRotationSpeed
         self.camera.rotationZAngle += self.cameraZRotationSpeed
-        self.camera.position[0] = np.sin(self.camera.rotationXAngle) * self.camera.orbit_radius
-        self.camera.position[1] = np.cos(self.camera.rotationYAngle) * self.camera.orbit_radius
-        self.camera.position[2] = np.tan(self.camera.rotationZAngle) * self.camera.orbit_radius
+        self.camera.position[0] = np.sin(self.camera.rotationXAngle) * self.camera.orbitRadius
+        self.camera.position[1] = np.cos(self.camera.rotationYAngle) * self.camera.orbitRadius
+        self.camera.position[2] = np.tan(self.camera.rotationZAngle) * self.camera.orbitRadius
         self.camera.update_position(self.camera.position)
 
         viewLocation = glGetUniformLocation(self.shader, "view")
@@ -196,7 +196,7 @@ class Camera:
         self.rotationXAngle = 0.0
         self.rotationYAngle = 0.0
         self.rotationZAngle = 0.0
-        self.orbit_radius = 4.0
+        self.orbitRadius = 2.0
         self.rotationSpeed = 0.01
 
         self.view_matrix = pyrr.matrix44.create_look_at(

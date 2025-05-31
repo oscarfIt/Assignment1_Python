@@ -45,10 +45,16 @@ def main():
 		keys = pg.key.get_pressed()
 		if keys[pg.K_j]:
 			window.cameraXRotationSpeed = CAMERA_ROTATION_SPEED
+		else:
+			window.cameraXRotationSpeed = 0.0
 		if keys[pg.K_k]:
 			window.cameraYRotationSpeed = CAMERA_ROTATION_SPEED
+		else:
+			window.cameraYRotationSpeed = 0.0
 		if keys[pg.K_l]:
 			window.cameraZRotationSpeed = CAMERA_ROTATION_SPEED
+		else:
+			window.cameraZRotationSpeed = 0.0
 		
 		window.render()
 
